@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -12,6 +15,20 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Timer timer = new Timer();
+        final Runnable running = new Runnable() {
+            public void run() {
+                //
+            }
+        };
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(running);
+            }
+        },10000);
+
+
     }
 
 
