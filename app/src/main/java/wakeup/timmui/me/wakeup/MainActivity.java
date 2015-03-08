@@ -11,7 +11,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends ActionBarActivity {
 
-    private final int DELAY = 10000;
+    private final int DELAY = 5000;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
