@@ -49,29 +49,34 @@ public class MainActivity extends ActionBarActivity {
             double orientChange = Math.abs(prevOrient [3] - rotation.w());
 
             Log.d("Accel",String.format("%.3f Change: %.3f", rotation.w(),orientChange));
-            Log.d("Time",Long.toString(timestamp-startTimestamp));
+            Log.d("Time",String.format("%d State: %d",(timestamp-startTimestamp),state));
 
             if ( orientChange <= 0.1){
-                if (state == 1 && Math.abs(timestamp-startTimestamp) >= 10000){
+                if (state == 1 && Math.abs(timestamp-startTimestamp) >= 10000 && Math.abs(timestamp-startTimestamp) < 20000){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG).show();
                     state ++;
                 }
-                else if (state == 2 && (Math.abs(timestamp-startTimestamp) >= 20000)){
+                else if (state == 2 && (Math.abs(timestamp-startTimestamp) >= 20000 && Math.abs(timestamp-startTimestamp) < 30000)){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     state ++;
                 }
-                else if (state == 3&& (Math.abs(timestamp-startTimestamp) >= 30000)){
+                else if (state == 3 && (Math.abs(timestamp-startTimestamp) >= 30000 && Math.abs(timestamp-startTimestamp) < 40000)){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
                     state ++;
                 }
-                else
+                else if (state == 4 && (Math.abs(timestamp-startTimestamp) >= 40000 && Math.abs(timestamp-startTimestamp) < 50000))
                 {
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    myo.vibrate(Myo.VibrationType.LONG);
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    myo.vibrate(Myo.VibrationType.LONG);
+
                     //TODO: Audio (Justin Bieber)
                     state = 1;
                     startTimestamp = timestamp;
