@@ -125,7 +125,11 @@ public class MainActivity extends ActionBarActivity {
                 } else if (orientChange > 0.01  && Math.abs(timestamp - startTimestamp) >= 800 && run) {
                 startTimestamp = timestamp;
                 state = 1;
-                mPlayer.stop();
+                try {
+                    mPlayer.stop();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
 
             }
 
