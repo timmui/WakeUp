@@ -2,15 +2,18 @@ package wakeup.timmui.me.wakeup;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Vibrator;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.thalmic.myo.AbstractDeviceListener;
@@ -18,95 +21,94 @@ import com.thalmic.myo.Arm;
 import com.thalmic.myo.DeviceListener;
 import com.thalmic.myo.Hub;
 import com.thalmic.myo.Myo;
-import com.thalmic.myo.Pose;
 import com.thalmic.myo.Quaternion;
-import com.thalmic.myo.XDirection;
-import com.thalmic.myo.Vector3;
 import com.thalmic.myo.scanner.ScanActivity;
-
 import java.io.IOException;
-import java.security.Timestamp;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 
 public class MainActivity extends ActionBarActivity {
 
-    private final int DELAY = 5000;
     private Context appContext;
     private MediaPlayer mPlayer;
     private Vibrator vibrator;
+    private TextView tv1;
+    private boolean run = false;
 
     private DeviceListener mListener = new AbstractDeviceListener() {
         private long startTimestamp = 0; // Timestamp since last movement
-        private double alertDelay = 1; // Time to alert (in minutes)
-        private double [] prevOrient = {0,0,0,0};
+        private double[] prevOrient = {0, 0, 0, 0};
         private int state = 1;
-        private int active = 1;
 
         @Override
-        public void onConnect (Myo myo, long timestamp){
+        public void onConnect(Myo myo, long timestamp) {
             startTimestamp = timestamp;
         }
 
         @Override
-        public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
-            float values[] = {0,0,0,0};
+        public void onOrientationData(Myo myo, long timestamp, Quaternion rotation) {
+            double orientChange = Math.abs(prevOrient[3] - rotation.w());
 
-            double orientChange = Math.abs(prevOrient [3] - rotation.w());
+            Log.d("Accel", String.format("%.3f Change: %.3f", rotation.w(), orientChange));
+            Log.d("Time", String.format("%d State: %d", (timestamp - startTimestamp), state));
 
-            Log.d("Accel",String.format("%.3f Change: %.3f", rotation.w(),orientChange));
-            Log.d("Time",String.format("%d State: %d",(timestamp-startTimestamp),state));
+            tv1.setText(String.format("Current State: %d \nTime: %d", state, timestamp - startTimestamp));
 
-            if ( orientChange <= 0.002){
-                if (state == 1 && Math.abs(timestamp-startTimestamp) >= 10000 && Math.abs(timestamp-startTimestamp) < 20000){
+            if (!run){
+                startTimestamp = timestamp;
+                state = 1;
+            }
+
+            if (orientChange <= 0.01 && run ) {
+                if (state == 1 && Math.abs(timestamp - startTimestamp) >= 10000 && Math.abs(timestamp - startTimestamp) < 20000) {
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     vibrator.vibrate(500);
 
-                    Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG).show();
-                    state ++;
-                }
-                else if (state == 2 && (Math.abs(timestamp-startTimestamp) >= 20000 && Math.abs(timestamp-startTimestamp) < 30000)){
+                    Toast.makeText(getApplicationContext(), "Wake UP! 1st Warning", Toast.LENGTH_LONG).show();
+                    state++;
+                } else if (state == 2 && (Math.abs(timestamp - startTimestamp) >= 20000 && Math.abs(timestamp - startTimestamp) < 30000)) {
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     vibrator.vibrate(2000);
 
-                    state ++;
-                }
-                else if (state == 3 && (Math.abs(timestamp-startTimestamp) >= 30000 && Math.abs(timestamp-startTimestamp) < 40000)){
+                    Toast.makeText(getApplicationContext(), "Wake UP! 2nd Warning", Toast.LENGTH_LONG).show();
+                    state++;
+                } else if (state == 3 && (Math.abs(timestamp - startTimestamp) >= 30000 && Math.abs(timestamp - startTimestamp) < 40000)) {
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
-                    vibrator.vibrate(new long[]{0,1000,500,1000,500,1000,500},-1);
-                    state ++;
+                    vibrator.vibrate(new long[]{0, 1000, 500, 1000, 500, 1000, 500}, -1);
+                    state++;
 
-                    try{
-                        mPlayer.prepare();
-                    }
-                    catch (IOException e){
-                        e.printStackTrace();
-                    }
+                    Toast.makeText(getApplicationContext(), "Wake UP! LAST Warning", Toast.LENGTH_LONG).show();
 
-                }
-                else if (state == 4 && (Math.abs(timestamp-startTimestamp) >= 40000 && Math.abs(timestamp-startTimestamp) < 50000))
-                {
+                } else if (state == 4 && (Math.abs(timestamp - startTimestamp) >= 40000 && Math.abs(timestamp - startTimestamp) < 50000)) {
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
-                    vibrator.vibrate(new long[]{0,1000,500,1000,500,1000,500},-1);
+                    vibrator.vibrate(new long[]{0, 1000, 500, 1000, 500, 1000, 500}, -1);
+
+                    Toast.makeText(getApplicationContext(), "Wake UP!!!! ", Toast.LENGTH_LONG).show();
 
                     //TODO: Audio (Justin Bieber)
+                    // Max Volume
+                    AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
+                    try {
+                        mPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     mPlayer.start();
 
                     state = 1;
-                    startTimestamp = timestamp;
+                    //startTimestamp = timestamp;
                 }
-            }
-            else {
+            } else if (orientChange > 0.01  && Math.abs(timestamp - startTimestamp) >= 800 && run) {
                 startTimestamp = timestamp;
                 state = 1;
                 mPlayer.stop();
@@ -114,71 +116,41 @@ public class MainActivity extends ActionBarActivity {
             }
 
             // Setting Current data to previous data
-            prevOrient [0] = rotation.x();
-            prevOrient [1] = rotation.y();
-            prevOrient [2] = rotation.z();
-            prevOrient [3] = rotation.w();
-        }
-        // onPose() is called whenever a Myo provides a new pose.
-        @Override
-        public void onPose(Myo myo, long timestamp, Pose pose){
-            // Handle the cases of the Pose enumeration, and change the text of the text view
-            // based on the pose we receive.
-            switch (pose) {
-                case UNKNOWN:
-                    //mTextView.setText(getString(R.string.hello_world));
-                    break;
-                case REST:
-                case DOUBLE_TAP:
-                    int restTextId = R.string.hello_world;
-                    switch (myo.getArm()) {
-                        case LEFT:
-                            //restTextId = R.string.arm_left;
-                            break;
-                        case RIGHT:
-                            //restTextId = R.string.arm_right;
-                            break;
-                    }
-                    //mTextView.setText(getString(restTextId));
-                    break;
-                case FIST:
-                    //mTextView.setText(getString(R.string.pose_fist));
-                    break;
-                case WAVE_IN:
-                    //mTextView.setText(getString(R.string.pose_wavein));
-                    break;
-                case WAVE_OUT:
-                    // mTextView.setText(getString(R.string.pose_waveout));
-                    break;
-                case FINGERS_SPREAD:
-                    //mTextView.setText(getString(R.string.pose_fingersspread));
-                    break;
-            }
-
-            if (pose != Pose.UNKNOWN && pose != Pose.REST) {
-                // Tell the Myo to stay unlocked until told otherwise. We do that here so you can
-                // hold the poses without the Myo becoming locked.
-                myo.unlock(Myo.UnlockType.HOLD);
-
-                // Notify the Myo that the pose has resulted in an action, in this case changing
-                // the text on the screen. The Myo will vibrate.
-                myo.notifyUserAction();
-            } else {
-                // Tell the Myo to stay unlocked only for a short period. This allows the Myo to
-                // stay unlocked while poses are being performed, but lock after inactivity.
-                myo.unlock(Myo.UnlockType.TIMED);
-            }
+            prevOrient[0] = rotation.x();
+            prevOrient[1] = rotation.y();
+            prevOrient[2] = rotation.z();
+            prevOrient[3] = rotation.w();
         }
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         appContext = getApplicationContext();
 
-        mPlayer = MediaPlayer.create(appContext, R.raw.alert);
-        vibrator = (Vibrator) appContext.getSystemService(VIBRATOR_SERVICE);
+        mPlayer = MediaPlayer.create(getApplicationContext(), R.raw.alert);
+        vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+
+        tv1 = createLabel (findViewById(R.id.layout)); // stuff
+        tv1.setText("No Myo Connected");
+
+        // Create Start button
+        final Button startButton = (Button) (findViewById(R.id.button));
+        startButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                run = !run;
+
+                if (run){
+                    startButton.setText("Stop");
+                }
+                else{
+                    startButton.setText("Start");
+                }
+            }
+        });
+
 
         // Myo Hub
         Hub hub = Hub.getInstance();
@@ -190,6 +162,16 @@ public class MainActivity extends ActionBarActivity {
         }
         hub.addListener(mListener);
 
+    }
+
+    public TextView createLabel (View rootView){
+        LinearLayout l = (LinearLayout) rootView.findViewById(R.id.layout);
+        l.setOrientation(LinearLayout.VERTICAL);
+
+        TextView tv = new TextView(rootView.getContext());
+        l.addView(tv);
+
+        return tv;
     }
 
     @Override
