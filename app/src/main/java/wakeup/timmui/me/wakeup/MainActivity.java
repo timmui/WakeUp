@@ -2,6 +2,7 @@ package wakeup.timmui.me.wakeup;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,8 @@ import com.thalmic.myo.XDirection;
 import com.thalmic.myo.Vector3;
 import com.thalmic.myo.scanner.ScanActivity;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.Timestamp;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,11 +38,23 @@ public class MainActivity extends ActionBarActivity {
         private double [] prevOrient = {0,0,0,0};
         private int state = 1;
         private int active = 1;
+        private MediaPlayer mediaPlayer;
 
 
         @Override
         public void onConnect (Myo myo, long timestamp){
             startTimestamp = timestamp;
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.alarm);
+            try {
+                mediaPlayer.prepare();
+            } catch (IllegalStateException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+
+
         }
 
         @Override
@@ -49,12 +64,13 @@ public class MainActivity extends ActionBarActivity {
             double orientChange = Math.abs(prevOrient [3] - rotation.w());
 
             Log.d("Accel",String.format("%.3f Change: %.3f", rotation.w(),orientChange));
-            Log.d("Time",String.format("%d State: %d",(timestamp-startTimestamp),state));
+            Log.d("Time",String.format("%d State: %d", (timestamp - startTimestamp), state));
 
             if ( orientChange <= 0.1){
                 if (state == 1 && Math.abs(timestamp-startTimestamp) >= 10000 && Math.abs(timestamp-startTimestamp) < 20000){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG).show();
+//                    mediaPlayer.stop();
                     state ++;
                 }
                 else if (state == 2 && (Math.abs(timestamp-startTimestamp) >= 20000 && Math.abs(timestamp-startTimestamp) < 30000)){
@@ -78,12 +94,14 @@ public class MainActivity extends ActionBarActivity {
                     myo.vibrate(Myo.VibrationType.LONG);
 
                     //TODO: Audio (Justin Bieber)
-                    state = 1;
+                    mediaPlayer.start();
+//                    state = 1;
                     startTimestamp = timestamp;
                 }
             }
             else {
                 startTimestamp = timestamp;
+                mediaPlayer.stop();
                 state = 1;
             }
 
@@ -199,4 +217,10 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, ScanActivity.class);
         startActivity(intent);
     }
+
+    /*public static void playSound() {
+        String path = "file path goes here";
+        File file = new File(path);
+
+    }*/
 }
