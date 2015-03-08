@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.thalmic.myo.AbstractDeviceListener;
 import com.thalmic.myo.Arm;
@@ -54,8 +55,8 @@ public class MainActivity extends ActionBarActivity {
 
                 //TODO: Do something awesome.
             }
-        };*/
-        //hub.addListener(mListener);
+        };
+        //hub.addListener(mListener);*/
 
         //Instantiates a new timer object
         Timer timer = new Timer();
