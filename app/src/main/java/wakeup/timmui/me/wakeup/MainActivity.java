@@ -1,7 +1,10 @@
 package wakeup.timmui.me.wakeup;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.os.Vibrator;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +24,7 @@ import com.thalmic.myo.XDirection;
 import com.thalmic.myo.Vector3;
 import com.thalmic.myo.scanner.ScanActivity;
 
+import java.io.IOException;
 import java.security.Timestamp;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,13 +33,16 @@ import java.util.TimerTask;
 public class MainActivity extends ActionBarActivity {
 
     private final int DELAY = 5000;
+    private Context appContext;
+    private MediaPlayer mPlayer;
+    private Vibrator vibrator;
+
     private DeviceListener mListener = new AbstractDeviceListener() {
         private long startTimestamp = 0; // Timestamp since last movement
         private double alertDelay = 1; // Time to alert (in minutes)
         private double [] prevOrient = {0,0,0,0};
         private int state = 1;
         private int active = 1;
-
 
         @Override
         public void onConnect (Myo myo, long timestamp){
@@ -51,9 +58,11 @@ public class MainActivity extends ActionBarActivity {
             Log.d("Accel",String.format("%.3f Change: %.3f", rotation.w(),orientChange));
             Log.d("Time",String.format("%d State: %d",(timestamp-startTimestamp),state));
 
-            if ( orientChange <= 0.1){
+            if ( orientChange <= 0.002){
                 if (state == 1 && Math.abs(timestamp-startTimestamp) >= 10000 && Math.abs(timestamp-startTimestamp) < 20000){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
+                    vibrator.vibrate(500);
+
                     Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG).show();
                     state ++;
                 }
@@ -61,6 +70,8 @@ public class MainActivity extends ActionBarActivity {
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
+                    vibrator.vibrate(2000);
+
                     state ++;
                 }
                 else if (state == 3 && (Math.abs(timestamp-startTimestamp) >= 30000 && Math.abs(timestamp-startTimestamp) < 40000)){
@@ -68,7 +79,16 @@ public class MainActivity extends ActionBarActivity {
                     myo.vibrate(Myo.VibrationType.LONG);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
+                    vibrator.vibrate(new long[]{0,1000,500,1000,500,1000,500},-1);
                     state ++;
+
+                    try{
+                        mPlayer.prepare();
+                    }
+                    catch (IOException e){
+                        e.printStackTrace();
+                    }
+
                 }
                 else if (state == 4 && (Math.abs(timestamp-startTimestamp) >= 40000 && Math.abs(timestamp-startTimestamp) < 50000))
                 {
@@ -76,8 +96,12 @@ public class MainActivity extends ActionBarActivity {
                     myo.vibrate(Myo.VibrationType.LONG);
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     myo.vibrate(Myo.VibrationType.LONG);
+                    vibrator.vibrate(new long[]{0,1000,500,1000,500,1000,500},-1);
 
                     //TODO: Audio (Justin Bieber)
+
+                    mPlayer.start();
+
                     state = 1;
                     startTimestamp = timestamp;
                 }
@@ -85,6 +109,8 @@ public class MainActivity extends ActionBarActivity {
             else {
                 startTimestamp = timestamp;
                 state = 1;
+                mPlayer.stop();
+
             }
 
             // Setting Current data to previous data
@@ -149,6 +175,10 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        appContext = getApplicationContext();
+
+        mPlayer = MediaPlayer.create(appContext, R.raw.alert);
+        vibrator = (Vibrator) appContext.getSystemService(VIBRATOR_SERVICE);
 
         // Myo Hub
         Hub hub = Hub.getInstance();
@@ -160,20 +190,12 @@ public class MainActivity extends ActionBarActivity {
         }
         hub.addListener(mListener);
 
-        //Instantiates a new timer object
-        Timer timer = new Timer();
-        final Runnable runnable = new Runnable(){
-            public void run(){
+    }
 
-            }
-        };
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(runnable);
-            }
-        },DELAY);
-
+    @Override
+    public void onDestroy (){
+        mPlayer.release();
+        super.onDestroy();
     }
 
     @Override
