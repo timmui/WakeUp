@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.os.Vibrator;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,7 +60,7 @@ public class MainActivity extends ActionBarActivity {
                 state = 1;
             }
 
-            if (orientChange <= 0.01 && run ) {
+            if (orientChange <= 0.02 && run ) {
                 if (state == 1 && Math.abs(timestamp - startTimestamp) >= 10000 && Math.abs(timestamp - startTimestamp) < 20000) {
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     vibrator.vibrate(500);
@@ -82,6 +83,12 @@ public class MainActivity extends ActionBarActivity {
                     vibrator.vibrate(new long[]{0, 1000, 500, 1000, 500, 1000, 500}, -1);
                     state++;
 
+                    try {
+                        mPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     Toast.makeText(getApplicationContext(), "Wake UP! LAST Warning", Toast.LENGTH_LONG).show();
 
                 } else if (state == 4 && (Math.abs(timestamp - startTimestamp) >= 40000 && Math.abs(timestamp - startTimestamp) < 50000)) {
@@ -98,17 +105,17 @@ public class MainActivity extends ActionBarActivity {
                     AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                     am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
-                    try {
-                        mPlayer.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     mPlayer.start();
+
+                    // Text
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage("5197295683", null, "Wake me up please!", null, null);
+                    smsManager.sendTextMessage("6478028459", null, "Wake me up please!", null, null);
 
                     state = 1;
                     //startTimestamp = timestamp;
                 }
-            } else if (orientChange > 0.01  && Math.abs(timestamp - startTimestamp) >= 800 && run) {
+            } else if (orientChange > 0.02  && Math.abs(timestamp - startTimestamp) >= 800 && run) {
                 startTimestamp = timestamp;
                 state = 1;
                 mPlayer.stop();
