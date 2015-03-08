@@ -31,10 +31,10 @@ public class MainActivity extends ActionBarActivity {
     private final int DELAY = 5000;
     private DeviceListener mListener = new AbstractDeviceListener() {
         private long startTimestamp = 0; // Timestamp since last movement
-        private int alertDelay = 10/60; // Time to alert (in minutes)
+        private double alertDelay = 1; // Time to alert (in minutes)
         private double [] prevOrient = {0,0,0,0};
 
-        @Override
+        /*@Override
         public void onAccelerometerData (Myo myo, long timestamp, Vector3 accel) {
             float [] values = {0,0,0};
             values [0] = (float) accel.x();
@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity {
 
             double magnitude = Math.sqrt(Math.pow(values[0],2) + Math.pow(values[1],2) + Math.pow(values[2],2));
 
-            Log.d("Accel",String.format("X: %.3f Y: %.3f Z: %.3f \n %.3f", values[0],values[1],values[2],magnitude));
+            //Log.d("Accel",String.format("X: %.3f Y: %.3f Z: %.3f \n %.3f", values[0],values[1],values[2],magnitude));
 
             if ( magnitude <= 0.1){
                 if ((timestamp-startTimestamp) >= alertDelay*60000){
@@ -51,10 +51,10 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
             else {
-                startTimestamp = timestamp;
+                //startTimestamp = timestamp;
             }
 
-        }
+        }*/
         @Override
         public void onConnect (Myo myo, long timestamp){
             startTimestamp = timestamp;
@@ -63,20 +63,24 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
             float values[] = {0,0,0,0};
-            Log.d("Accel",String.format("%.3f", rotation.w()));
 
             double orientChange = Math.abs(prevOrient [3] - rotation.w());
 
+            Log.d("Accel",String.format("%.3f Change: %.3f", rotation.w(),orientChange));
+            Log.d("Time",Long.toString(timestamp-startTimestamp));
+
             if ( orientChange <= 0.1){
-                if ((timestamp-startTimestamp) >= alertDelay*60000){
+                if (Math.abs(timestamp-startTimestamp) >= 10000){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
-                    Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG).show();
+                    startTimestamp = timestamp;
                 }
             }
             else {
                 startTimestamp = timestamp;
             }
 
+            // Setting Current data to previous data
             prevOrient [0] = rotation.x();
             prevOrient [1] = rotation.y();
             prevOrient [2] = rotation.z();
