@@ -33,28 +33,10 @@ public class MainActivity extends ActionBarActivity {
         private long startTimestamp = 0; // Timestamp since last movement
         private double alertDelay = 1; // Time to alert (in minutes)
         private double [] prevOrient = {0,0,0,0};
+        private int state = 1;
+        private int active = 1;
 
-        /*@Override
-        public void onAccelerometerData (Myo myo, long timestamp, Vector3 accel) {
-            float [] values = {0,0,0};
-            values [0] = (float) accel.x();
-            values [1] = (float) accel.y();
-            values [2] = (float) accel.z();
 
-            double magnitude = Math.sqrt(Math.pow(values[0],2) + Math.pow(values[1],2) + Math.pow(values[2],2));
-
-            //Log.d("Accel",String.format("X: %.3f Y: %.3f Z: %.3f \n %.3f", values[0],values[1],values[2],magnitude));
-
-            if ( magnitude <= 0.1){
-                if ((timestamp-startTimestamp) >= alertDelay*60000){
-                    //myo.vibrate(Myo.VibrationType.MEDIUM);
-                }
-            }
-            else {
-                //startTimestamp = timestamp;
-            }
-
-        }*/
         @Override
         public void onConnect (Myo myo, long timestamp){
             startTimestamp = timestamp;
@@ -70,14 +52,34 @@ public class MainActivity extends ActionBarActivity {
             Log.d("Time",Long.toString(timestamp-startTimestamp));
 
             if ( orientChange <= 0.1){
-                if (Math.abs(timestamp-startTimestamp) >= 10000){
+                if (state == 1 && Math.abs(timestamp-startTimestamp) >= 10000){
                     myo.vibrate(Myo.VibrationType.MEDIUM);
                     Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG).show();
+                    state ++;
+                }
+                else if (state == 2 && (Math.abs(timestamp-startTimestamp) >= 20000)){
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    state ++;
+                }
+                else if (state == 3&& (Math.abs(timestamp-startTimestamp) >= 30000)){
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    myo.vibrate(Myo.VibrationType.LONG);
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    myo.vibrate(Myo.VibrationType.LONG);
+                    state ++;
+                }
+                else
+                {
+                    //TODO: Audio (Justin Bieber)
+                    state = 1;
                     startTimestamp = timestamp;
                 }
             }
             else {
                 startTimestamp = timestamp;
+                state = 1;
             }
 
             // Setting Current data to previous data
