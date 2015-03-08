@@ -31,14 +31,15 @@ public class MainActivity extends ActionBarActivity {
     private final int DELAY = 5000;
     private DeviceListener mListener = new AbstractDeviceListener() {
         private long startTimestamp = 0; // Timestamp since last movement
-        private int alertDelay = 1/60; // Time to alert (in minutes)
+        private int alertDelay = 10/60; // Time to alert (in minutes)
+        private double [] prevOrient = {0,0,0,0};
 
         @Override
         public void onAccelerometerData (Myo myo, long timestamp, Vector3 accel) {
             float [] values = {0,0,0};
             values [0] = (float) accel.x();
-            values [1] = (float) accel.x();
-            values [2] = (float) accel.x();
+            values [1] = (float) accel.y();
+            values [2] = (float) accel.z();
 
             double magnitude = Math.sqrt(Math.pow(values[0],2) + Math.pow(values[1],2) + Math.pow(values[2],2));
 
@@ -46,7 +47,7 @@ public class MainActivity extends ActionBarActivity {
 
             if ( magnitude <= 0.1){
                 if ((timestamp-startTimestamp) >= alertDelay*60000){
-                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    //myo.vibrate(Myo.VibrationType.MEDIUM);
                 }
             }
             else {
@@ -57,6 +58,29 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onConnect (Myo myo, long timestamp){
             startTimestamp = timestamp;
+        }
+
+        @Override
+        public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
+            float values[] = {0,0,0,0};
+            Log.d("Accel",String.format("%.3f", rotation.w()));
+
+            double orientChange = Math.abs(prevOrient [3] - rotation.w());
+
+            if ( orientChange <= 0.1){
+                if ((timestamp-startTimestamp) >= alertDelay*60000){
+                    myo.vibrate(Myo.VibrationType.MEDIUM);
+                    Toast.makeText(getApplicationContext(), "Wake UP!", Toast.LENGTH_LONG);
+                }
+            }
+            else {
+                startTimestamp = timestamp;
+            }
+
+            prevOrient [0] = rotation.x();
+            prevOrient [1] = rotation.y();
+            prevOrient [2] = rotation.z();
+            prevOrient [3] = rotation.w();
         }
         // onPose() is called whenever a Myo provides a new pose.
         @Override
