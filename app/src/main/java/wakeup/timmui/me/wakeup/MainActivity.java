@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.thalmic.myo.Hub;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -16,6 +18,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        Hub hub = Hub.getInstance();
 
         Timer timer = new Timer();
         final Runnable runnable = new Runnable(){
