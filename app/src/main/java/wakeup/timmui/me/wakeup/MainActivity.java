@@ -117,7 +117,7 @@ public class MainActivity extends ActionBarActivity {
 
                     // Text
                     SmsManager smsManager = SmsManager.getDefault();
-                    //smsManager.sendTextMessage("5197295683",null,"Wake me up please!",null,null);
+                    smsManager.sendTextMessage("5197295683",null,"Wake me up please!",null,null);
                     smsManager.sendTextMessage("6478028459",null,"Wake me up please!",null,null);
 
                     state=1;
@@ -215,6 +215,11 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         if (R.id.action_scan == id) {
             onScanActionSelected();
+            return true;
+        }
+        else if (R.id.action_about == id) {
+            Intent intent = new Intent (MainActivity.this,About.class);
+            startActivity (intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
