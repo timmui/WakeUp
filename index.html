@@ -14,6 +14,21 @@
     <![endif]-->
 
     <title>Wakeup by timmui</title>
+
+    </style>
+    <script type="text/javascript">
+    var random_images_array = ['1.jpg','2.jpg','3.jpg','4.jpg','5.jpg','6.jpg','7.jpg','8.jpg'];
+
+    function getRandomImage(imgAr, path) {
+        path = path || 'images/tnyslp/'; // default path here
+        var num = Math.floor( Math.random() * imgAr.length );
+        var img = imgAr[ num ];
+        var imgStr = '<img src="' + path + img + '" alt = "Sleepy Student Sleeping">';
+        document.write(imgStr); document.close();
+    }
+
+    </script>
+
   </head>
 
   <body>
@@ -33,7 +48,7 @@
 
 <p>This is a simple app to keep you awake during those long lectures. Using the Myo, the app can identify when you are dosing off and it will try to wake you up by vibrating the Myo. After a few attempts at waking you up, the app will perform something that will definitely wake you up. Hopefully it doesn't have to get to that point.</p>
 <p>Don't Be like him! Don't fall a sleep in class!</p>
-<img src="http://timmui.me/WakeUp/images/tnyslp/6.jpg" alt="Sleepy Student Sleeping">
+<script type="text/javascript">getRandomImage(random_images_array, 'images/tnyslp')</script>
 <h3>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
