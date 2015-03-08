@@ -5,13 +5,31 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class MainActivity extends ActionBarActivity {
 
+    private final int DELAY = 10000;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Timer timer = new Timer();
+        final Runnable runnable = new Runnable(){
+            public void run(){
+
+            }
+        };
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(runnable);
+            }
+        },DELAY);
+
     }
 
 
