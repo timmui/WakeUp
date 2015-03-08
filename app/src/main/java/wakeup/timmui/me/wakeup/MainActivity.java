@@ -1,5 +1,6 @@
 package wakeup.timmui.me.wakeup;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ public class MainActivity extends ActionBarActivity {
 
     private final int DELAY = 5000;
     private DeviceListener mListener;
+    private Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +40,8 @@ public class MainActivity extends ActionBarActivity {
             finish();
             return;
         }
-       /* mListener = new AbstractDeviceListener() {
+        mContext = getApplicationContext();
+        mListener = new AbstractDeviceListener() {
             @Override
             public void onConnect(Myo myo, long timestamp) {
                 Toast.makeText(mContext, "Myo Connected!", Toast.LENGTH_SHORT).show();
@@ -56,7 +59,7 @@ public class MainActivity extends ActionBarActivity {
                 //TODO: Do something awesome.
             }
         };
-        //hub.addListener(mListener);*/
+        //hub.addListener(mListener);
 
         //Instantiates a new timer object
         Timer timer = new Timer();
