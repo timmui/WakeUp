@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,7 +117,7 @@ public class MainActivity extends ActionBarActivity {
 
                     // Text
                     SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage("5197295683",null,"Wake me up please!",null,null);
+                    //smsManager.sendTextMessage("5197295683",null,"Wake me up please!",null,null);
                     smsManager.sendTextMessage("6478028459",null,"Wake me up please!",null,null);
 
                     state=1;
@@ -125,7 +126,14 @@ public class MainActivity extends ActionBarActivity {
                 } else if (orientChange > 0.01  && Math.abs(timestamp - startTimestamp) >= 800 && run) {
                 startTimestamp = timestamp;
                 state = 1;
-                mPlayer.stop();
+
+                try{
+                    mPlayer.stop();
+                }
+                catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+
 
             }
 
@@ -146,23 +154,34 @@ public class MainActivity extends ActionBarActivity {
 
         vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
 
-        tv1 = createLabel (findViewById(R.id.layout)); // stuff
+        tv1 = (TextView) findViewById(R.id.tv1); // stuff
         tv1.setText("No Myo Connected");
 
         // Create Start button
-        final Button startButton = (Button) (findViewById(R.id.button));
+        final ImageButton startButton = (ImageButton) (findViewById(R.id.bStart));
+        final ImageButton stopButton = (ImageButton) (findViewById(R.id.bStop));
+
         startButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                run = !run;
-
-                if (run){
-                    startButton.setText("Stop");
-                }
-                else{
-                    startButton.setText("Start");
-                }
+                run = true;
+                startButton.setVisibility(View.INVISIBLE);
+                startButton.setEnabled(false);
+                stopButton.setVisibility(View.VISIBLE);
+                stopButton.setEnabled(true);
             }
         });
+
+        // Create Start button
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                run = false;
+                stopButton.setVisibility(View.INVISIBLE);
+                stopButton.setEnabled(false);
+                startButton.setVisibility(View.VISIBLE);
+                startButton.setEnabled(true);
+            }
+        });
+
 
 
         // Myo Hub
@@ -175,16 +194,6 @@ public class MainActivity extends ActionBarActivity {
         }
         hub.addListener(mListener);
 
-    }
-
-    public TextView createLabel (View rootView){
-        LinearLayout l = (LinearLayout) rootView.findViewById(R.id.layout);
-        l.setOrientation(LinearLayout.VERTICAL);
-
-        TextView tv = new TextView(rootView.getContext());
-        l.addView(tv);
-
-        return tv;
     }
 
     @Override
