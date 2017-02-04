@@ -117,7 +117,7 @@ public class MainActivity extends ActionBarActivity {
 
                     // Text
                     SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage("5197295683",null,"Wake me up please!",null,null);
+                    smsManager.sendTextMessage("6477295683",null,"Wake me up please!",null,null);
                     smsManager.sendTextMessage("6478028459",null,"Wake me up please!",null,null);
 
                     state=1;
